@@ -6,14 +6,18 @@ peerweb is a monitoring component.
 
 ## Usage
 
-> pip install peertools
-> peercli router.host.name --help
-> peerweb -c path/to/config.py
+```sh
+pip install peertools
+peercli router.host.name --help
+peerweb -c path/to/config.py
+```
 
 # Examples
 
-> peercli router.host.name 12345 info 1.2.3.4
-> peercli router.host.name 77777 summary
+```sh
+peercli router.host.name 12345 info 1.2.3.4
+peercli router.host.name 77777 summary
+```
 
 ## Supported Routers
 

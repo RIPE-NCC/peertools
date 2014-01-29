@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Router Automatation for GII
+Router Automation
 '''
 
 import argparse, re, logging, netaddr
