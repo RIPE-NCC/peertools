@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+'''
+Peering DB CLI
+'''
+
+import argparse, logging
+from peertools import peeringdb, config
+
+log = logging.getLogger()
+
+#### Main ####
+
+def parse_args():
+    parser = argparse.ArgumentParser(description=__doc__,
+            formatter_class=argparse.RawDescriptionHelpFormatter)
+
+    parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument('-c', '--config')
+    subparsers = parser.add_subparsers()
+    
+    p_search = subparsers.add_parser('search', help='search for a peer')
+    p_search.add_argument('text')
+    p_search.set_defaults(func=lambda a: peeringdb.search(a.text))
+    
+    p_info = subparsers.add_parser('info', help='get info on a peer')
+    p_info.add_argument('peer')
+    p_info.set_defaults(func=lambda a: peeringdb.info(a.peer))
+    
+    p_common = subparsers.add_parser('common', help='find common peering points')
+    p_common.add_argument('peer1')
+    p_common.add_argument('peer2')
+    p_common.set_defaults(func=lambda a: peeringdb.common(a.peer1, a.peer2))
+    
+    p_all = subparsers.add_parser('all', help='find all possible peers')
+    p_all.add_argument('peer')
+    p_all.set_defaults(func=lambda a: peeringdb.all_possible(a.peer))
+    
+    p_contacts = subparsers.add_parser('contact', help='find contact info')
+    p_contacts.add_argument('name')
+    p_contacts.set_defaults(func=lambda a: peeringdb.contacts(a.name))
+    
+    return parser.parse_args()
+
+def main():
+    args = parse_args()
+
+    level = logging.DEBUG if args.verbose else logging.WARN
+    logging.basicConfig(level=level, format='%(asctime)-15s %(levelname)s %(name)s: %(message)s')
+
+    if args.config:
+        config.load(args.config)
+   
+    peeringdb.init(config.PEERINGDB_URL, args.verbose)
+    args.func(args)
+    log.info('done')
+
+if __name__== '__main__':
+    main()

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Peertools</title>
+    <meta name="description" content="">
+    <link rel="stylesheet" href="static/reset.min.css">
+    <link rel="stylesheet" href="static/peer.css">
+</head>
+<body>
+    <div id=header>
+        <h1>Peertools</h1>
+        <a class=button href=#peers>Peering Mon</a>
+        <a class=button href=#routers>Routers</a>
+        <a class=button href=#addpeer>Add Peer</a>
+        <a class=button href=#look>Looking Glass</a>
+    </div>
+    <div id=content>
+        <div id=leftside>
+            <div class=box>
+                <h2>controls</h2>
+                <p>
+                    <a class=button id=refresh>refresh state</a>
+                </p>
+                <p class=status id=refresh_status>not refreshed</p>
+                <div id=quick>
+                    <table>
+                        <col style='width: 50%'>
+                        <col style='width: 50%'>
+                        <thead><tr><th>router</th><th>status</th></tr></thead>
+                        <tbody>
+                            <tr><td>...</td><td>...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div id=main>
+            <div id=peers class=box>
+                <h2>peering mon</h2>
+                <table class=pretty>
+                </table>
+                <p class=status>
+                    <span>not refreshed</span>
+                    <a class="button reload">reload</a>
+                </p>
+            </div>
+            <div id=routers class=box>
+                <h2>routers</h2>
+                <table class=pretty>
+                </table>
+                <p class=status>
+                    <span>not refreshed</span>
+                    <a class="button reload">reload</a>
+                </p>
+            </div>
+            <div id=debug class=box>
+                <h2>debugging</h2>
+                <p>
+                    <a class=button href=api/peers>api/peers</a>
+                    <a class=button href=api/routers>api/routers</a>
+                    <a class=button href=api/routers/rrc001.ripe.net>api/router/rrc001.ripe.net</a>
+                    <a class=button href=api/look/rrc001.ripe.net/uptime>api/look/rrc001.ripe.net/uptime</a>
+                </p>
+            </div>
+            <div id=look class=box>
+                <h2>looking glass</h2>
+                <p>Router Regex: <input id=host type=text size=40 value=".*" />
+                    (ex: rrc011, ams, .*)</p>
+                <p>Command: <input id=cmd type=text size=80 value="show system uptime"/></p>
+                <p><a onclick="look()" class=button>execute</a> <span id=look_status></span></p>
+                <p><textarea disabled=true></textarea></p>
+            </div>
+            <div id=addpeer class=box>
+                <h2>add peerings</h2>
+                <p>...TODO...</p>
+            </div>
+        </div>
+    </div>
+    <div id=footer>
+        <iframe src=http://www.iheartquotes.com/api/v1/random?format=html frameborder=0 scrolling=no width=100%></iframe>
+    </div>
+    <script src="static/jquery.min.js"></script>
+    <script src="static/jquery.dataTables.min.js"></script>
+    <script src="static/jquery.dataTables.fnReloadAjax.js"></script>
+    <script src="static/peer.js"></script>
+</body>
+</html>

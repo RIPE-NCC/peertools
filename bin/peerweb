@@ -1,0 +1,119 @@
+#!/usr/bin/env python
+'''
+Router Automatation for GII
+'''
+import logging, os.path, re, argparse, os
+
+from datetime import datetime
+from threading import Thread
+
+from peertools import config, routers, utils
+from peertools.web_utils import RouterData, expose_json
+
+import cherrypy
+from cherrypy.lib.static import serve_file
+
+log = logging.getLogger()
+
+STATIC_DIR = os.path.abspath(os.path.dirname(config.__file__)) + "/static"
+
+class G:
+    '''Globals'''
+    routers = [ ]
+
+class Root(object):
+    @cherrypy.expose
+    def index(self):
+        return serve_file(STATIC_DIR + "/index.html", "text/html")
+
+class Api(object):
+    @expose_json
+    def refresh(self, host=None, _=None):
+        threads = []
+
+        for router in match_routers(host):
+            t = Thread(target=lambda: router.refresh())
+            t.daemon = True
+            t.start()
+            threads.append(t)
+
+        for t in threads:
+            t.join()
+
+        return 'done'
+
+    @expose_json
+    def routers(self, host=None, _=None):
+        return { 'data': match_routers(host) }
+
+    @expose_json
+    def peers(self, host=None, _=None):
+        peers = []
+        for router in match_routers(host):
+            peers += router.peers
+
+        return { 'data': peers }
+    
+    @expose_json
+    def look(self, host, cmd, _=None):
+        results = {}
+        for router in match_routers(host):
+            with router.handle as con:
+                results[router.name] = con.cmd(cmd)
+
+        return { 'host': host, 'cmd': cmd, 'results': results }
+
+def match_routers(host):
+    '''Return each router matching the pattern host'''
+    if host == None:
+        return G.routers
+    else:
+        return [ r for r in G.routers if re.match(host, r.name) ]
+
+def parse_args():
+    logging.basicConfig(level=logging.INFO,
+            format='%(asctime)-15s %(levelname)s %(name)s: %(message)s')
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('-v', '--verbose', action='store_true')
+    parser.add_argument('-c', '--config', required=True)
+    parser.add_argument('-p', '--port', type=int, default=8080)
+    args = parser.parse_args()
+
+    if args.verbose:
+        logging.getLogger().level = logging.DEBUG
+
+    return args
+
+def main():
+    args = parse_args() 
+   
+    utils.register_signal_handlers()
+    config.load(args.config)
+    
+    cherrypy.config.update({
+        'log.screen': False,
+        'server.socket_host': '0.0.0.0',
+        'server.socket_port': args.port,
+    })
+
+    for r in config.ROUTERS:
+        handle = routers.RouterHandle(*r)
+        G.routers.append(RouterData(handle))
+
+    root = Root()
+    root.api = Api()
+
+    cherrypy.quickstart(root, "", {
+        '/api': {
+            'tools.caching.on': True,
+            'tools.caching.delay': 60,
+        },
+        '/static': {
+            'tools.staticdir.on': True,
+            'tools.staticdir.dir': STATIC_DIR,
+        },
+    })
+
+if __name__ == '__main__':
+    main()
